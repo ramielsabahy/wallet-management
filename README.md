@@ -20,3 +20,9 @@ Below are the steps required to get the project up and running :
 ## Postman Documentation
 
 You can find the APIs documentation by examples here [https://documenter.getpostman.com/view/3208343/2sAYBbcU6s](https://documenter.getpostman.com/view/3208343/2sAYBbcU6s)
+
+
+## Architecture Used In The Project
+- Used service oriented architecture
+- Used Strategy design pattern to apply both kinds of transfer fees also to apply Open/Closed Principle and make the component more reusable
+- Used PEST as a testing framework
