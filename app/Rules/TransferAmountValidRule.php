@@ -29,7 +29,7 @@ class TransferAmountValidRule implements ValidationRule, DataAwareRule
         if ($value >= 25 && auth()->user()->wallet->balance + 25 < $value){
             $fail("Your balance isn't enough to transfer.");
         }
-        if ($user->email == auth()->user()->email){
+        if ($user?->email == auth()->user()->email){
             $fail("You can't transfer to yourself.");
         }
     }
