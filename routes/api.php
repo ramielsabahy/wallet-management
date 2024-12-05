@@ -15,6 +15,7 @@ Route::group(['prefix' => 'auth'], function () {
 });
 Route::group(['middleware' => 'auth:sanctum', 'prefix' => 'wallet'], function () {
     Route::post('top-up', [TransactionController::class, 'topUp']);
+    Route::post('withdraw', [TransactionController::class, 'withdraw']);
     Route::post('transfer', [TransactionController::class, 'transfer']);
     Route::get('transactions', [TransactionController::class, 'list']);
 });

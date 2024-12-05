@@ -23,7 +23,10 @@ class TransactionService
      */
     public function topUp(int $amount, User|Authenticatable $user): bool
     {
-        DB::beginTransaction();
+        $activeTransactionExists = DB::transactionLevel() > 0;
+        if (!$activeTransactionExists) {
+            DB::beginTransaction();
+        }
         try {
             $user->wallet()->increment('balance', amount: $amount);
             $this->log($user->wallet->id, TransactionTypeEnum::DEPOSIT->value, $amount, $user->wallet->balance);
@@ -37,7 +40,10 @@ class TransactionService
 
     public function transfer(User|Authenticatable $fromUser, array $data): bool
     {
-        DB::beginTransaction();
+        $activeTransactionExists = DB::transactionLevel() > 0;
+        if (!$activeTransactionExists) {
+            DB::beginTransaction();
+        }
         try {
             $toUser = User::whereEmail(Arr::get($data, 'email'))->first();
             $amount = Arr::get($data, 'amount');
@@ -55,6 +61,23 @@ class TransactionService
 
             $this->log($fromUser->wallet->id, TransactionTypeEnum::OUTGOING_TRANSFER->value, $amount, $fromUser->wallet->balance - $totalAfterFees, $fee, $toUser->wallet->id);
             $this->log($toUser->wallet->id, TransactionTypeEnum::INCOMING_TRANSFER->value, $amount, $toUser->wallet->balance, $fee, $fromUser->wallet->id);
+            DB::commit();
+        }catch (\Exception $exception){
+            DB::rollBack();
+            return false;
+        }
+        return true;
+    }
+
+    public function withdraw(User|Authenticatable $user, float $amount): bool
+    {
+        $activeTransactionExists = DB::transactionLevel() > 0;
+        if (!$activeTransactionExists) {
+            DB::beginTransaction();
+        }
+        try {
+            $user->wallet()->decrement('balance', amount: $amount);
+            $this->log($user->wallet->id, TransactionTypeEnum::WITHDRAWAL->value, $amount, $user->wallet->balance - $amount);
             DB::commit();
         }catch (\Exception $exception){
             DB::rollBack();
