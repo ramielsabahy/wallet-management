@@ -23,8 +23,11 @@ class TransferAmountValidRule implements ValidationRule, DataAwareRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $user = User::whereEmail($this->data['email'])->first();
-        if (!$user || auth()->user()->wallet->balance < $value) {
+        if (auth()->user()->wallet->balance < $value) {
             $fail("Your balance isn't enough to transfer.");
+        }
+        if (!$user){
+            $fail("Target User not found.");
         }
         if ($value >= 25 && auth()->user()->wallet->balance + 25 < $value){
             $fail("Your balance isn't enough to transfer.");
